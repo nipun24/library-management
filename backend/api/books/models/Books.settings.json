@@ -1,0 +1,30 @@
+{
+  "connection": "default",
+  "collectionName": "books",
+  "info": {
+    "name": "books",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": [
+      "created_at",
+      "updated_at"
+    ],
+    "comment": ""
+  },
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "isbn": {
+      "type": "integer"
+    },
+    "copies": {
+      "type": "integer"
+    },
+    "issued": {
+      "type": "integer"
+    }
+  }
+}

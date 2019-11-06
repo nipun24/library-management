@@ -1,0 +1,27 @@
+{
+  "connection": "default",
+  "collectionName": "students",
+  "info": {
+    "name": "student",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": [
+      "created_at",
+      "updated_at"
+    ],
+    "comment": ""
+  },
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "rollNumber": {
+      "type": "string"
+    },
+    "books": {
+      "type": "json"
+    }
+  }
+}
