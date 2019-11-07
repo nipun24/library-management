@@ -25,6 +25,9 @@
     },
     "issued": {
       "type": "integer"
+    },
+    "author": {
+      "type": "string"
     }
   }
 }
