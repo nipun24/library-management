@@ -1,5 +1,7 @@
 import React from 'react';
-import {Paper, Table, TableBody, TableCell, TableRow, TableHead, TextField} from '@material-ui/core';
+import {Paper, Table, TableBody, TableCell, TableRow, TableHead, TextField, 
+    Button, Dialog, DialogActions, DialogTitle, DialogContent} from '@material-ui/core';
+import AddIcon from '@material-ui/icons/Add';
 import {StyleSheet,css} from 'aphrodite';
 
 const style = StyleSheet.create({
@@ -11,8 +13,8 @@ const style = StyleSheet.create({
         padding: '8px',
         outline: 'none'
     },
-    tableSearchField: {
-        
+    dialogFields: {
+        margin: '8px'
     }
 });
 
@@ -26,7 +28,12 @@ class Books extends React.Component {
             searchAuthor: '',
             searchIsbn: '',
             searchCopies: '',
-            searchIssuedCopies: ''
+            searchIssuedCopies: '',
+            dialogOpen: true,
+            titleErr: false,
+            authorErr: false,
+            isbnErr: false,
+            copiesErr: false
         }
     }
 
@@ -54,6 +61,41 @@ class Books extends React.Component {
         this.setState({searchIssuedCopies: e.target.value})
     }
 
+    addBookDialog = () => {
+        this.setState({dialogOpen: true})
+    }
+
+    handleDialogClose = () => {
+        this.setState({
+            dialogOpen: false,
+            titleErr: false,
+            authorErr: false,
+            isbnErr: false,
+            copiesErr: false
+        })
+    }
+
+    addBook = () => {
+        let title = document.getElementById("add-title").value
+        let author = document.getElementById("add-author").value
+        let isbn = document.getElementById("add-isbn").value
+        let copies = document.getElementById("add-copies").value
+        if(title === ''){
+            this.setState({titleErr: true})
+        }
+        if(author === ''){
+            this.setState({authorErr: true})
+        }
+        if(isNaN(parseInt(isbn))){
+            this.setState({isbnErr: true})
+        }
+        if(isNaN(parseInt(copies))){
+            this.setState({copiesErr: true})
+        }
+        
+        // this.handleDialogClose()
+    }
+
     render(){
         let filteredBooks = this.state.books.filter((val) => {
             return val.name.toLowerCase().indexOf(this.state.searchTitle) !== -1 &&
@@ -65,7 +107,15 @@ class Books extends React.Component {
 
         return(
             <div style={{backgroundColor: "#bbdefb", padding: "24px", }}>
-                <Paper>
+                <Button 
+                    variant="contained"
+                    startIcon={<AddIcon/>}
+                    style={{backgroundColor: "#4caf50", position: "absolute", right: "24px"}}
+                    onClick={this.addBookDialog}
+                >
+                    add book
+                </Button> 
+                <Paper style={{marginTop: "48px"}}>
                     <Table>
                         <TableHead>
                             <TableRow>
@@ -112,6 +162,47 @@ class Books extends React.Component {
                         </TableBody>
                     </Table>
                 </Paper>
+                <Dialog open={this.state.dialogOpen} onClose={this.handleDialogClose} >
+                    <DialogTitle>Add a Book</DialogTitle>
+                    <DialogContent>
+                        <TextField 
+                            id="add-title"
+                            error={this.state.titleErr} 
+                            className={css(style.dialogFields)} 
+                            variant="outlined" 
+                            label="Title"
+                        />
+                        <TextField 
+                            id="add-author"
+                            error={this.state.authorErr} 
+                            className={css(style.dialogFields)} 
+                            variant="outlined" 
+                            label="Author"
+                        />
+                        <TextField
+                            id="add-isbn"
+                            error={this.state.isbnErr}
+                            className={css(style.dialogFields)} 
+                            variant="outlined" 
+                            label="ISBN"
+                        />
+                        <TextField 
+                            id="add-copies"
+                            error={this.state.copiesErr}
+                            className={css(style.dialogFields)} 
+                            variant="outlined" 
+                            label="Number of Copies"
+                        />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={this.handleDialogClose} color="primary">
+                            Cancel
+                        </Button>
+                        <Button onClick={this.addBook} color="primary">
+                            Add
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </div>
         );
     }
