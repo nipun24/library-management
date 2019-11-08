@@ -15,19 +15,27 @@
   },
   "attributes": {
     "title": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "isbn": {
-      "type": "integer"
+      "type": "biginteger",
+      "required": true,
+      "unique": true
     },
     "copies": {
-      "type": "integer"
+      "type": "integer",
+      "required": true,
+      "default": "1"
     },
     "issued": {
-      "type": "integer"
+      "type": "integer",
+      "default": "0",
+      "required": true
     },
     "author": {
-      "type": "string"
+      "type": "string",
+      "required": true
     }
   }
 }

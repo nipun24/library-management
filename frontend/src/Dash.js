@@ -53,10 +53,6 @@ class Dash extends React.Component{
         .then(data => this.setState({books: data}))
     }
 
-    showBooks = () => {
-        this.props.history.push('/books', {books: this.state.books})
-    }
-
     render(){
         return(
             <div style={{height: `${this.props.height}px`,backgroundColor: "#bbdefb"}}>
@@ -69,7 +65,7 @@ class Dash extends React.Component{
                             books issued
                         </Typography>
                     </Paper>
-                    <Paper className={css(style.cardStyle)} onClick={this.showBooks}>
+                    <Paper className={css(style.cardStyle)} onClick={() => this.props.history.push('/books')}>
                         <Typography variant="h1">
                             {this.state.books.length}
                         </Typography>
@@ -77,7 +73,7 @@ class Dash extends React.Component{
                             books remaining
                         </Typography>
                     </Paper>
-                    <Paper className={css(style.cardStyle)}>
+                    <Paper className={css(style.cardStyle)} onClick={() => this.props.history.push('/students')}>
                         <Typography variant="h1">
                             {this.state.students.length}
                         </Typography>

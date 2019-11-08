@@ -15,10 +15,13 @@
   },
   "attributes": {
     "name": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "rollNumber": {
-      "type": "string"
+      "type": "string",
+      "unique": true,
+      "required": true
     },
     "books": {
       "type": "json"

@@ -5,6 +5,7 @@ import {Paper, Table, TableBody, TableCell, TableRow, TableHead, TextField,
 import AddIcon from '@material-ui/icons/Add';
 import CloseIcon from '@material-ui/icons/Close';
 import DeleteIcon from '@material-ui/icons/Delete';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import {StyleSheet,css} from 'aphrodite';
 
 const style = StyleSheet.create({
@@ -21,34 +22,30 @@ const style = StyleSheet.create({
     }
 });
 
-class Books extends React.Component {
+class Students extends React.Component {
     
     constructor(props){
         super(props);
         this.state = {
-            books: [],
-            searchTitle: '',
-            searchAuthor: '',
-            searchIsbn: '',
-            searchCopies: '',
-            searchIssuedCopies: '',
+            students: [],
+            searchName: '',
+            searchRollNumber: '',
+            searchNoOfBooks: '',
+            nameErr: false,
+            rollNumberErr: false,
             dialogOpen: false,
-            titleErr: false,
-            authorErr: false,
-            isbnErr: false,
-            copiesErr: false,
             hover: 'hidden',
+            rollNoToDelete: '',
             deleteDialog: false,
             hiddenElem: null,
-            isbnToDelete: '',
             snackbarMessage: '',
             snackbarOpen: false
         }
     }
 
     componentDidMount(){
-        //fetching books
-        fetch('http://localhost:1337/books',{
+        //fetching students
+        fetch('http://localhost:1337/students',{
             method: 'GET',
             headers:{
                 'Content-Type': 'application/json',
@@ -56,118 +53,100 @@ class Books extends React.Component {
             },
         })
         .then(response => response.json())
-        .then(data => this.setState({books: data}))
-    }
-
-    onTitleSearchChange = (e) => {
-        this.setState({searchTitle: e.target.value.toLowerCase()})
-    }
-
-    onAuthorSearchChange = (e) => {
-        this.setState({searchAuthor: e.target.value.toLowerCase()})
-    }
-
-    onIsbnSearchChange = (e) => {
-        this.setState({searchIsbn: e.target.value})
-    }
-
-    onCopiesSearchChange = (e) => {
-        this.setState({searchCopies: e.target.value})
-    }
-
-    onIssuedCopiesSearchChange = (e) => {
-        this.setState({searchIssuedCopies: e.target.value})
-    }
-
-    handleDialogClose = () => {
-        this.setState({
-            dialogOpen: false,
-            titleErr: false,
-            authorErr: false,
-            isbnErr: false,
-            copiesErr: false
+        .then(data => {
+            var final = []
+            var i
+            for(i in data){
+                let c = data[i].books.length
+                final.push({...data[i], noOfBooks: c})
+            }
+            this.setState({students: final})
         })
     }
 
-    addBook = () => {
-        let title = document.getElementById("add-title").value
-        let author = document.getElementById("add-author").value
-        let isbn = document.getElementById("add-isbn").value
-        let copies = document.getElementById("add-copies").value
+    onNameSearchChange = (e) => {
+        this.setState({searchName: e.target.value.toLowerCase()})
+    }
+
+    onRollNumberSearchChange = (e) => {
+        this.setState({searchRollNumber: e.target.value.toLowerCase()})
+    }
+
+    onNoOfBooksSearchChange = (e) => {
+        this.setState({searchNoOfBooks: e.target.value.toLowerCase()})
+    }    
+
+    handleDialogClose = () => {
+        this.setState({
+            nameErr: false,
+            rollNumberErr: false,
+            dialogOpen: false
+        })
+    }
+
+    addStudent = () => {
+        let name = document.getElementById("add-name").value
+        let rollNumber = document.getElementById("add-roll-number").value.toUpperCase()
         var c = 0
 
-        if(title === ''){
-            this.setState({titleErr: true})
+        if(name === ''){
+            this.setState({nameErr: true})
         }
         else {
-            this.setState({titleErr: false})
+            this.setState({nameErr: false})
             c++
         }
-        if(author === ''){
-            this.setState({authorErr: true})
+        if(rollNumber === ''){
+            this.setState({rollNumberErr: true})
         }
         else {
-            this.setState({authorErr: false})
-            c++
-        }
-        if(isNaN(parseInt(isbn))){
-            this.setState({isbnErr: true})
-        }
-        else {
-            this.setState({isbnErr: false})
-            c++
-        }
-        if(isNaN(parseInt(copies))){
-            this.setState({copiesErr: true})
-        }
-        else {
-            this.setState({copiesErr: false})
+            this.setState({rollNumberErr: false})
             c++
         }
          
-        if(c===4){
-            //adding books to strapi
-            fetch('http://localhost:1337/books',{
+        if(c===2){
+            //adding student to database
+            fetch('http://localhost:1337/students',{
                 method: 'POST',
                 headers:{
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${sessionStorage.getItem('token')}`
                 },
                 body: JSON.stringify({
-                    title,
-                    author,
-                    isbn,
-                    copies,
-                    issued: 0
+                    name,
+                    rollNumber,
+                    books: []
                 })
             })
             .then(response => response.json())
             .then(data => {
-                let books = this.state.books
-                books.push(data)
-                this.setState({...books, snackbarOpen: true, snackbarMessage: "Book added successfully!"})
+                let students = this.state.students
+                students.push(data)
+                this.setState({...students, snackbarOpen: true, snackbarMessage: "Student added successfully!"})
                 this.handleDialogClose()
             })
             .catch(() => {
-                this.setState({snackbarOpen: true, snackbarMessage: "Book cannot be added!"})
+                this.setState({snackbarOpen: true, snackbarMessage: "Student cannot be added!"})
                 this.handleDialogClose()
             })
         }
     }
 
-    deleteBook = () => {
-        let isbn = this.state.isbnToDelete
-        let books =  this.state.books
-        var bookToDelete
-        let booksToKeep = books.filter((a)=>{
-            if(a.isbn === isbn){
-                bookToDelete = a
+    deleteStudent = () => {
+        let rollNumber = this.state.rollNoToDelete
+        let students =  this.state.students
+        var studentToDelete
+        let studentsToKeep = students.filter((a)=>{
+            if(a.rollNumber === rollNumber){
+                studentToDelete = a
             }
-            return a.isbn !== isbn
+            return a.rollNumber !== rollNumber
         })
 
+        console.log(studentToDelete)
+
         //deleting book from database
-        fetch(`http://localhost:1337/books/${bookToDelete.id}`,{
+        fetch(`http://localhost:1337/students/${studentToDelete.id}`,{
             method: 'DELETE',
             headers:{
                 'Content-Type': 'application/json',
@@ -176,7 +155,7 @@ class Books extends React.Component {
         })
         .then(response => response.json())
         .then(data => {
-            this.setState({books: booksToKeep, deleteDialog: false, snackbarOpen: true, snackbarMessage: "Book deleted successfully!"})
+            this.setState({students: studentsToKeep, deleteDialog: false, snackbarOpen: true, snackbarMessage: "Book deleted successfully!"})
         })
         .catch(() => {
             this.setState({snackbarOpen: true, deleteDialog: false, snackbarMessage: "Book cannot be deleted!"})
@@ -195,13 +174,10 @@ class Books extends React.Component {
     }
 
     render(){
-        console.log(this.state.books)
-        let filteredBooks = this.state.books.filter((val) => {
-            return val.title.toLowerCase().indexOf(this.state.searchTitle) !== -1 &&
-                val.author.toLowerCase().indexOf(this.state.searchAuthor) !== -1 &&
-                val.isbn.toString().indexOf(this.state.searchIsbn) !== -1 &&
-                val.copies.toString().indexOf(this.state.searchCopies) !== -1 &&
-                val.issued.toString().indexOf(this.state.searchIssuedCopies) !== -1
+        let filteredStudents = this.state.students.filter((val) => {
+            return val.name.toLowerCase().indexOf(this.state.searchName) !== -1 &&
+                val.rollNumber.toLowerCase().indexOf(this.state.searchRollNumber) !== -1 &&
+                val.noOfBooks.toString().indexOf(this.state.searchNoOfBooks) !== -1
         })
 
         return(
@@ -212,17 +188,15 @@ class Books extends React.Component {
                     style={{backgroundColor: "#4caf50", position: "absolute", right: "24px"}}
                     onClick={() => {this.setState({dialogOpen: true})}}
                 >
-                    add book
+                    add student
                 </Button> 
                 <Paper style={{marginTop: "48px"}}>
                     <Table>
                         <TableHead>
                             <TableRow>
-                                <TableCell className={css(style.tableHeading)}>Title</TableCell>
-                                <TableCell align="right" className={css(style.tableHeading)}>Author</TableCell>
-                                <TableCell align="right" className={css(style.tableHeading)}>ISBN</TableCell>
-                                <TableCell align="right" className={css(style.tableHeading)}>Copies</TableCell>
-                                <TableCell align="right" className={css(style.tableHeading)}>Issued Copies</TableCell>
+                                <TableCell className={css(style.tableHeading)}>Name</TableCell>
+                                <TableCell align="right" className={css(style.tableHeading)}>Roll Number</TableCell>
+                                <TableCell align="right" className={css(style.tableHeading)}>No. of books</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -231,92 +205,75 @@ class Books extends React.Component {
                                     <TextField 
                                         variant="outlined" 
                                         style={{width: "100%"}} 
-                                        onChange={this.onTitleSearchChange} 
+                                        onChange={this.onNameSearchChange} 
                                     />
                                 </TableCell>
                                 <TableCell align="right" className={css(style.tableSearchFieldHead)}>
-                                    <TextField variant="outlined" onChange={this.onAuthorSearchChange}/>
+                                    <TextField variant="outlined" onChange={this.onRollNumberSearchChange}/>
                                 </TableCell>
                                 <TableCell align="right" className={css(style.tableSearchFieldHead)}>
-                                    <TextField variant="outlined" onChange={this.onIsbnSearchChange} />
-                                </TableCell>
-                                <TableCell align="right" className={css(style.tableSearchFieldHead)}>
-                                    <TextField variant="outlined" onChange={this.onCopiesSearchChange} />
-                                </TableCell>
-                                <TableCell align="right" className={css(style.tableSearchFieldHead)}>
-                                    <TextField variant="outlined" onChange={this.onIssuedCopiesSearchChange} />
+                                    <TextField variant="outlined" onChange={this.onNoOfBooksSearchChange} />
                                 </TableCell>
                             </TableRow>
-                            {filteredBooks.map((row,i) => (
+                            {filteredStudents.map((row,i) => (
                                 <TableRow 
-                                    id={row.isbn}
+                                    id={row.rollNumber}
                                     key={i} 
                                     onMouseEnter={this.onHoverStart}
                                     onMouseLeave={this.onHoverOver}
                                 >
                                     <TableCell component="th" scope="row">
-                                        {row.title}
+                                        {row.name}
                                         <IconButton 
                                             style={{float: "right", visibility: "hidden", cursor: "pointer", padding: "0px"}}
-                                            onClick={(e) => this.setState({deleteDialog: true, isbnToDelete: e.target.closest('tr').id})}
+                                            onClick={(e) => this.setState({deleteDialog: true, rollNoToDelete: e.target.closest('tr').id})}
                                         >
                                             <DeleteIcon/>
                                         </IconButton>
                                     </TableCell>
-                                    <TableCell align="right">{row.author}</TableCell>
-                                    <TableCell align="right">{row.isbn}</TableCell>
-                                    <TableCell align="right">{row.copies}</TableCell>
-                                    <TableCell align="right">{row.issued}</TableCell>
+                                    <TableCell align="right">{row.rollNumber}</TableCell>
+                                    <TableCell align="right">
+                                        <IconButton>
+                                            <VisibilityIcon/>
+                                        </IconButton>
+                                        {row.noOfBooks}
+                                    </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
                     </Table>
                 </Paper>
 
-                {/* dialog to add books */}
+                {/* dialog to add students */}
                 <Dialog open={this.state.dialogOpen} onClose={this.handleDialogClose} >
-                    <DialogTitle>Add a Book</DialogTitle>
+                    <DialogTitle>Add a Student</DialogTitle>
                     <DialogContent>
                         <TextField 
-                            id="add-title"
-                            error={this.state.titleErr} 
+                            id="add-name"
+                            error={this.state.nameErr} 
                             className={css(style.dialogFields)} 
                             variant="outlined" 
-                            label="Title"
+                            label="Name"
                         />
                         <TextField 
-                            id="add-author"
-                            error={this.state.authorErr} 
+                            id="add-roll-number"
+                            error={this.state.rollNumberErr} 
                             className={css(style.dialogFields)} 
                             variant="outlined" 
-                            label="Author"
-                        />
-                        <TextField
-                            id="add-isbn"
-                            error={this.state.isbnErr}
-                            className={css(style.dialogFields)} 
-                            variant="outlined" 
-                            label="ISBN"
-                        />
-                        <TextField 
-                            id="add-copies"
-                            error={this.state.copiesErr}
-                            className={css(style.dialogFields)} 
-                            variant="outlined" 
-                            label="Number of Copies"
+                            label="Roll Number"
                         />
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={this.handleDialogClose} color="primary">
                             Cancel
                         </Button>
-                        <Button onClick={this.addBook} color="primary">
+                        <Button onClick={this.addStudent} color="primary">
                             Add
                         </Button>
                     </DialogActions>
                 </Dialog>
 
-                {/* snackbar for add book success */}
+                {/* snackbar */}
                 <Snackbar
                     anchorOrigin={{
                         vertical: 'bottom',
@@ -341,22 +298,22 @@ class Books extends React.Component {
                     ]}
                 />
 
-                {/* Dialog to confirn book deletion */}
+                {/* Dialog to confirn student deletion */}
                 <Dialog
                     open={this.state.deleteDialog}
                     onClose={() => this.setState({deleteDialog: false})}
                 >
-                    <DialogTitle>Delete Book</DialogTitle>
+                    <DialogTitle>Delete Student</DialogTitle>
                     <DialogContent>
                     <DialogContentText>
-                        Are you sure you want to permanently delete this book?
+                        Are you sure you want to permanently delete this student?
                     </DialogContentText>
                     </DialogContent>
                     <DialogActions>
                     <Button onClick={() => this.setState({deleteDialog: false})} color="primary">
                         Cancel
                     </Button>
-                    <Button onClick={this.deleteBook} color="primary" autoFocus>
+                    <Button onClick={this.deleteStudent} color="primary" autoFocus>
                         Yes
                     </Button>
                     </DialogActions>
@@ -366,4 +323,4 @@ class Books extends React.Component {
     }
 }
 
-export default Books
+export default Students

@@ -4,6 +4,7 @@ import {createBrowserHistory} from 'history';
 import Home from './Home';
 import Dash from './Dash';
 import Books from './Books';
+import Student from './Student';
 import {AppBar, Toolbar, Typography} from '@material-ui/core';
 
 class App extends React.Component {
@@ -37,6 +38,7 @@ class App extends React.Component {
           <Route exact path="/" render={(props) => <Home {...props} height={this.state.height}/>} />
           <Route path="/dash" render={(props) => <Dash {...props} height={this.state.height}/>} />
           <Route path="/books" render={(props) => <Books {...props} height={this.state.height}/>} />
+          <Route path="/students" render={(props) => <Student {...props} height={this.state.height} />} />
         </Switch>
       </Router>
     )
