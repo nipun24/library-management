@@ -58,7 +58,6 @@ class Dash extends React.Component{
     }
 
     render(){
-        console.log(this.state.books)
         return(
             <div style={{height: `${this.props.height}px`,backgroundColor: "#bbdefb"}}>
                 <Grid container justify="center" alignItems="center" style={{padding: "24px"}}>

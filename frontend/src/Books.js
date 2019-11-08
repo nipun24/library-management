@@ -1,7 +1,8 @@
 import React from 'react';
 import {Paper, Table, TableBody, TableCell, TableRow, TableHead, TextField, 
-    Button, Dialog, DialogActions, DialogTitle, DialogContent} from '@material-ui/core';
+    Button, Dialog, DialogActions, DialogTitle, DialogContent, Snackbar, IconButton} from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
+import CloseIcon from '@material-ui/icons/Close'
 import {StyleSheet,css} from 'aphrodite';
 
 const style = StyleSheet.create({
@@ -29,11 +30,12 @@ class Books extends React.Component {
             searchIsbn: '',
             searchCopies: '',
             searchIssuedCopies: '',
-            dialogOpen: true,
+            dialogOpen: false,
             titleErr: false,
             authorErr: false,
             isbnErr: false,
-            copiesErr: false
+            copiesErr: false,
+            addBookSnackbarOpen: false
         }
     }
 
@@ -80,25 +82,77 @@ class Books extends React.Component {
         let author = document.getElementById("add-author").value
         let isbn = document.getElementById("add-isbn").value
         let copies = document.getElementById("add-copies").value
+        let c = 0
+
         if(title === ''){
             this.setState({titleErr: true})
+            c++
+        }
+        else {
+            this.setState({titleErr: false})
+            c--
         }
         if(author === ''){
             this.setState({authorErr: true})
+            c++
+        }
+        else {
+            this.setState({authorErr: false})
+            c--
         }
         if(isNaN(parseInt(isbn))){
             this.setState({isbnErr: true})
+            c++    
+        }
+        else {
+            this.setState({isbnErr: false})
+            c--
         }
         if(isNaN(parseInt(copies))){
             this.setState({copiesErr: true})
+            c++
         }
-        
-        // this.handleDialogClose()
+        else {
+            this.setState({copiesErr: false})
+            c--
+        }
+
+        if(c === 0) {
+            //adding books to strapi
+            fetch('http://localhost:1337/books',{
+                method: 'POST',
+                headers:{
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${sessionStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    title,
+                    author,
+                    isbn,
+                    copies,
+                    issued: 0
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data)
+                let books = this.state.books
+                books.push(data)
+                console.log(books)
+                this.setState({...books, addBookSnackbarOpen: true})
+                this.handleDialogClose()
+            })
+            // .catch(err => {this.setState({})})
+        }
+    }
+
+    handleAddBookSnackbarClose = () => {
+        this.setState({addBookSnackbarOpen: false})
     }
 
     render(){
         let filteredBooks = this.state.books.filter((val) => {
-            return val.name.toLowerCase().indexOf(this.state.searchTitle) !== -1 &&
+            return val.title.toLowerCase().indexOf(this.state.searchTitle) !== -1 &&
                 val.author.toLowerCase().indexOf(this.state.searchAuthor) !== -1 &&
                 val.isbn.toString().indexOf(this.state.searchIsbn) !== -1 &&
                 val.copies.toString().indexOf(this.state.searchCopies) !== -1 &&
@@ -149,9 +203,9 @@ class Books extends React.Component {
                                 </TableCell>
                             </TableRow>
                             {filteredBooks.map(row => (
-                            <TableRow key={row.name}>
+                            <TableRow key={row.title}>
                                 <TableCell component="th" scope="row">
-                                    {row.name}
+                                    {row.title}
                                 </TableCell>
                                 <TableCell align="right">{row.author}</TableCell>
                                 <TableCell align="right">{row.isbn}</TableCell>
@@ -162,6 +216,8 @@ class Books extends React.Component {
                         </TableBody>
                     </Table>
                 </Paper>
+
+                {/* dialog to add books */}
                 <Dialog open={this.state.dialogOpen} onClose={this.handleDialogClose} >
                     <DialogTitle>Add a Book</DialogTitle>
                     <DialogContent>
@@ -203,6 +259,31 @@ class Books extends React.Component {
                         </Button>
                     </DialogActions>
                 </Dialog>
+
+                {/* snackbar for add book success */}
+                <Snackbar
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                    }}
+                    open={this.state.addBookSnackbarOpen}
+                    autoHideDuration={6000}
+                    onClose={this.handleAddBookSnackbarClose}
+                    ContentProps={{
+                        'aria-describedby': 'message-id',
+                    }}
+                    message={<span id="message-id">Book Added</span>}
+                    action={[
+                        <IconButton
+                            key="close"
+                            aria-label="close"
+                            color="inherit"
+                            onClick={this.handleAddBookSnackbarClose}
+                        >
+                            <CloseIcon />
+                        </IconButton>,
+                    ]}
+                />
             </div>
         );
     }

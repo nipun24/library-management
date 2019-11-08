@@ -14,7 +14,7 @@
     "comment": ""
   },
   "attributes": {
-    "name": {
+    "title": {
       "type": "string"
     },
     "isbn": {
