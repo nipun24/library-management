@@ -18,7 +18,7 @@ import {
 } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import CloseIcon from "@material-ui/icons/Close";
-import DeleteIcon from "@material-ui/icons/Delete";
+import ReplayIcon from "@material-ui/icons/Replay";
 import { StyleSheet, css } from "aphrodite";
 
 const style = StyleSheet.create({
@@ -35,16 +35,17 @@ const style = StyleSheet.create({
   }
 });
 
-class Books extends React.Component {
+class Issue extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       books: [],
+      students: [],
       searchTitle: "",
-      searchAuthor: "",
       searchIsbn: "",
-      searchCopies: "",
-      searchIssuedCopies: "",
+      searchName: "",
+      searchRollNumber: "",
+      ////////////////
       dialogOpen: false,
       titleErr: false,
       authorErr: false,
@@ -70,26 +71,35 @@ class Books extends React.Component {
     })
       .then(response => response.json())
       .then(data => this.setState({ books: data }));
+
+    //fetching student
+    fetch("http://localhost:1337/students", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token")}`
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        this.setState({ students: data });
+      });
   }
-
-  onTitleSearchChange = e => {
-    this.setState({ searchTitle: e.target.value.toLowerCase() });
-  };
-
-  onAuthorSearchChange = e => {
-    this.setState({ searchAuthor: e.target.value.toLowerCase() });
-  };
 
   onIsbnSearchChange = e => {
     this.setState({ searchIsbn: e.target.value });
   };
 
-  onCopiesSearchChange = e => {
-    this.setState({ searchCopies: e.target.value });
+  onTitleSearchChange = e => {
+    this.setState({ searchTitle: e.target.value.toLowerCase() });
   };
 
-  onIssuedCopiesSearchChange = e => {
-    this.setState({ searchIssuedCopies: e.target.value });
+  onNameSearchChange = e => {
+    this.setState({ searchName: e.target.value.toLowerCase() });
+  };
+
+  onRollNoSearchChange = e => {
+    this.setState({ searchRollNumber: e.target.value.toLowerCase() });
   };
 
   handleDialogClose = () => {
@@ -220,15 +230,32 @@ class Books extends React.Component {
   };
 
   render() {
-    console.log(this.state.books);
-    let filteredBooks = this.state.books.filter(val => {
-      return (
-        val.title.toLowerCase().indexOf(this.state.searchTitle) !== -1 &&
-        val.author.toLowerCase().indexOf(this.state.searchAuthor) !== -1 &&
-        val.isbn.toString().indexOf(this.state.searchIsbn) !== -1 &&
-        val.copies.toString().indexOf(this.state.searchCopies) !== -1 &&
-        val.issued.toString().indexOf(this.state.searchIssuedCopies) !== -1
-      );
+    var filteredStudents = [];
+    let students = JSON.parse(JSON.stringify(this.state.students));
+
+    students.forEach(student => {
+      let finalStudent = student;
+      if (student.books.length > 0) {
+        var filteredBooks = [];
+        student.books.forEach(book => {
+          if (
+            book.isbn.toString().indexOf(this.state.searchIsbn) !== -1 &&
+            book.title.indexOf(this.state.searchTitle) !== -1
+          ) {
+            filteredBooks.push(book);
+          }
+        });
+
+        if (
+          student.name.toLowerCase().indexOf(this.state.searchName) !== -1 &&
+          student.rollNumber
+            .toLowerCase()
+            .indexOf(this.state.searchRollNumber) !== -1
+        ) {
+          finalStudent.books = filteredBooks;
+          filteredStudents.push(finalStudent);
+        }
+      }
     });
 
     return (
@@ -245,24 +272,21 @@ class Books extends React.Component {
             this.setState({ dialogOpen: true });
           }}
         >
-          add book
+          issue book
         </Button>
         <Paper style={{ marginTop: "48px" }}>
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell className={css(style.tableHeading)}>Title</TableCell>
+                <TableCell className={css(style.tableHeading)}>ISBN</TableCell>
                 <TableCell align="right" className={css(style.tableHeading)}>
-                  Author
+                  Title
                 </TableCell>
                 <TableCell align="right" className={css(style.tableHeading)}>
-                  ISBN
+                  Student Name
                 </TableCell>
                 <TableCell align="right" className={css(style.tableHeading)}>
-                  Copies
-                </TableCell>
-                <TableCell align="right" className={css(style.tableHeading)}>
-                  Issued Copies
+                  Roll Number
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -272,24 +296,6 @@ class Books extends React.Component {
                   <TextField
                     variant="outlined"
                     style={{ width: "100%" }}
-                    onChange={this.onTitleSearchChange}
-                  />
-                </TableCell>
-                <TableCell
-                  align="right"
-                  className={css(style.tableSearchFieldHead)}
-                >
-                  <TextField
-                    variant="outlined"
-                    onChange={this.onAuthorSearchChange}
-                  />
-                </TableCell>
-                <TableCell
-                  align="right"
-                  className={css(style.tableSearchFieldHead)}
-                >
-                  <TextField
-                    variant="outlined"
                     onChange={this.onIsbnSearchChange}
                   />
                 </TableCell>
@@ -299,7 +305,7 @@ class Books extends React.Component {
                 >
                   <TextField
                     variant="outlined"
-                    onChange={this.onCopiesSearchChange}
+                    onChange={this.onTitleSearchChange}
                   />
                 </TableCell>
                 <TableCell
@@ -308,42 +314,54 @@ class Books extends React.Component {
                 >
                   <TextField
                     variant="outlined"
-                    onChange={this.onIssuedCopiesSearchChange}
+                    onChange={this.onNameSearchChange}
+                  />
+                </TableCell>
+                <TableCell
+                  align="right"
+                  className={css(style.tableSearchFieldHead)}
+                >
+                  <TextField
+                    variant="outlined"
+                    onChange={this.onRollNoSearchChange}
                   />
                 </TableCell>
               </TableRow>
-              {filteredBooks.map((row, i) => (
-                <TableRow
-                  id={row.isbn}
-                  key={i}
-                  onMouseEnter={this.onHoverStart}
-                  onMouseLeave={this.onHoverOver}
-                >
-                  <TableCell component="th" scope="row">
-                    {row.title}
-                    <IconButton
-                      style={{
-                        float: "right",
-                        visibility: "hidden",
-                        cursor: "pointer",
-                        padding: "0px"
-                      }}
-                      onClick={e =>
-                        this.setState({
-                          deleteDialog: true,
-                          isbnToDelete: e.target.closest("tr").id
-                        })
-                      }
+              {filteredStudents.map(student => {
+                return student.books.map((book, i) => {
+                  return (
+                    <TableRow
+                      id={book.isbn}
+                      key={i}
+                      onMouseEnter={this.onHoverStart}
+                      onMouseLeave={this.onHoverOver}
                     >
-                      <DeleteIcon />
-                    </IconButton>
-                  </TableCell>
-                  <TableCell align="right">{row.author}</TableCell>
-                  <TableCell align="right">{row.isbn}</TableCell>
-                  <TableCell align="right">{row.copies}</TableCell>
-                  <TableCell align="right">{row.issued}</TableCell>
-                </TableRow>
-              ))}
+                      <TableCell component="th" scope="row">
+                        {book.isbn}
+                        <IconButton
+                          style={{
+                            float: "right",
+                            visibility: "hidden",
+                            cursor: "pointer",
+                            padding: "0px"
+                          }}
+                          onClick={e =>
+                            this.setState({
+                              deleteDialog: true,
+                              rollNoToDelete: e.target.closest("tr").id
+                            })
+                          }
+                        >
+                          <ReplayIcon />
+                        </IconButton>
+                      </TableCell>
+                      <TableCell align="right">{book.title}</TableCell>
+                      <TableCell align="right">{student.name}</TableCell>
+                      <TableCell align="right">{student.rollNumber}</TableCell>
+                    </TableRow>
+                  );
+                });
+              })}
             </TableBody>
           </Table>
         </Paper>
@@ -448,4 +466,4 @@ class Books extends React.Component {
   }
 }
 
-export default Books;
+export default Issue;
