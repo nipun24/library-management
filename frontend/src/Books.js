@@ -14,11 +14,13 @@ import {
   DialogContent,
   Snackbar,
   IconButton,
-  DialogContentText
+  DialogContentText,
+  Menu,
+  MenuItem
 } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import CloseIcon from "@material-ui/icons/Close";
-import DeleteIcon from "@material-ui/icons/Delete";
+import MoreVertIcon from "@material-ui/icons/MoreVert";
 import { StyleSheet, css } from "aphrodite";
 
 const style = StyleSheet.create({
@@ -32,6 +34,17 @@ const style = StyleSheet.create({
   },
   dialogFields: {
     margin: "8px"
+  },
+  menuButton: {
+    visibility: "hidden",
+    float: "right",
+    cursor: "pointer",
+    padding: "0px"
+  },
+  hover: {
+    ":hover #menu-button": {
+      visibility: "visible"
+    }
   }
 });
 
@@ -50,12 +63,11 @@ class Books extends React.Component {
       authorErr: false,
       isbnErr: false,
       copiesErr: false,
-      hover: "hidden",
       deleteDialog: false,
-      hiddenElem: null,
       isbnToDelete: "",
       snackbarMessage: "",
-      snackbarOpen: false
+      snackbarOpen: false,
+      openMenu: null
     };
   }
 
@@ -208,15 +220,8 @@ class Books extends React.Component {
       });
   };
 
-  onHoverStart = e => {
-    let hiddenElem = e.target.parentElement.getElementsByTagName("button")[0];
-    hiddenElem.style.visibility = "visible";
-    this.setState({ hiddenElem });
-  };
-
-  onHoverOver = e => {
-    let hiddenElem = this.state.hiddenElem;
-    hiddenElem.style.visibility = "hidden";
+  onMenuClose = () => {
+    this.setState({ openMenu: null });
   };
 
   render() {
@@ -313,30 +318,31 @@ class Books extends React.Component {
                 </TableCell>
               </TableRow>
               {filteredBooks.map((row, i) => (
-                <TableRow
-                  id={row.isbn}
-                  key={i}
-                  onMouseEnter={this.onHoverStart}
-                  onMouseLeave={this.onHoverOver}
-                >
+                <TableRow id={row.isbn} key={i} className={css(style.hover)}>
                   <TableCell component="th" scope="row">
                     {row.title}
                     <IconButton
-                      style={{
-                        float: "right",
-                        visibility: "hidden",
-                        cursor: "pointer",
-                        padding: "0px"
-                      }}
+                      className={css(style.menuButton)}
+                      id="menu-button"
                       onClick={e =>
-                        this.setState({
-                          deleteDialog: true,
-                          isbnToDelete: e.target.closest("tr").id
-                        })
+                        this.setState({ openMenu: e.currentTarget })
                       }
                     >
-                      <DeleteIcon />
+                      <MoreVertIcon />
                     </IconButton>
+                    <Menu
+                      id="simple-menu"
+                      anchorEl={this.state.openMenu}
+                      keepMounted
+                      open={Boolean(this.state.openMenu)}
+                      onClose={this.onMenuClose}
+                    >
+                      <MenuItem onClick={this.onMenuClose}>
+                        Delete Book
+                      </MenuItem>
+                      <MenuItem onClick={this.onMenuClose}>Edit Book</MenuItem>
+                      <MenuItem onClick={this.onMenuClose}>Issue Book</MenuItem>
+                    </Menu>
                   </TableCell>
                   <TableCell align="right">{row.author}</TableCell>
                   <TableCell align="right">{row.isbn}</TableCell>

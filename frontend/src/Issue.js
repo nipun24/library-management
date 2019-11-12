@@ -14,11 +14,12 @@ import {
   DialogContent,
   Snackbar,
   IconButton,
-  DialogContentText
+  DialogContentText,
+  Menu,
+  MenuItem
 } from "@material-ui/core";
-import AddIcon from "@material-ui/icons/Add";
+import MoreVertIcon from "@material-ui/icons/MoreVert";
 import CloseIcon from "@material-ui/icons/Close";
-import ReplayIcon from "@material-ui/icons/Replay";
 import { StyleSheet, css } from "aphrodite";
 
 const style = StyleSheet.create({
@@ -32,6 +33,17 @@ const style = StyleSheet.create({
   },
   dialogFields: {
     margin: "8px"
+  },
+  menuButton: {
+    visibility: "hidden",
+    float: "right",
+    cursor: "pointer",
+    padding: "0px"
+  },
+  hover: {
+    ":hover #menu-button": {
+      visibility: "visible"
+    }
   }
 });
 
@@ -45,15 +57,13 @@ class Issue extends React.Component {
       searchIsbn: "",
       searchName: "",
       searchRollNumber: "",
+      openMenu: null,
       ////////////////
-      dialogOpen: false,
       titleErr: false,
       authorErr: false,
       isbnErr: false,
       copiesErr: false,
-      hover: "hidden",
       deleteDialog: false,
-      hiddenElem: null,
       isbnToDelete: "",
       snackbarMessage: "",
       snackbarOpen: false
@@ -218,15 +228,8 @@ class Issue extends React.Component {
       });
   };
 
-  onHoverStart = e => {
-    let hiddenElem = e.target.parentElement.getElementsByTagName("button")[0];
-    hiddenElem.style.visibility = "visible";
-    this.setState({ hiddenElem });
-  };
-
-  onHoverOver = e => {
-    let hiddenElem = this.state.hiddenElem;
-    hiddenElem.style.visibility = "hidden";
+  onMenuClose = () => {
+    this.setState({ openMenu: null });
   };
 
   render() {
@@ -260,21 +263,7 @@ class Issue extends React.Component {
 
     return (
       <div style={{ backgroundColor: "#bbdefb", padding: "24px" }}>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          style={{
-            backgroundColor: "#4caf50",
-            position: "absolute",
-            right: "24px"
-          }}
-          onClick={() => {
-            this.setState({ dialogOpen: true });
-          }}
-        >
-          issue book
-        </Button>
-        <Paper style={{ marginTop: "48px" }}>
+        <Paper>
           <Table>
             <TableHead>
               <TableRow>
@@ -333,27 +322,38 @@ class Issue extends React.Component {
                     <TableRow
                       id={book.isbn}
                       key={i}
-                      onMouseEnter={this.onHoverStart}
-                      onMouseLeave={this.onHoverOver}
+                      className={css(style.hover)}
                     >
-                      <TableCell component="th" scope="row">
+                      <TableCell
+                        component="th"
+                        scope="row"
+                        style={{ paddingRight: "0" }}
+                      >
                         {book.isbn}
                         <IconButton
-                          style={{
-                            float: "right",
-                            visibility: "hidden",
-                            cursor: "pointer",
-                            padding: "0px"
-                          }}
+                          className={css(style.menuButton)}
+                          id="menu-button"
+                          style={{}}
                           onClick={e =>
-                            this.setState({
-                              deleteDialog: true,
-                              rollNoToDelete: e.target.closest("tr").id
-                            })
+                            this.setState({ openMenu: e.currentTarget })
                           }
                         >
-                          <ReplayIcon />
+                          <MoreVertIcon />
                         </IconButton>
+                        <Menu
+                          id="simple-menu"
+                          anchorEl={this.state.openMenu}
+                          keepMounted
+                          open={Boolean(this.state.openMenu)}
+                          onClose={this.onMenuClose}
+                        >
+                          <MenuItem onClick={this.onMenuClose}>
+                            Return Book
+                          </MenuItem>
+                          <MenuItem onClick={this.onMenuClose}>
+                            Re-Issue Book
+                          </MenuItem>
+                        </Menu>
                       </TableCell>
                       <TableCell align="right">{book.title}</TableCell>
                       <TableCell align="right">{student.name}</TableCell>
@@ -367,8 +367,11 @@ class Issue extends React.Component {
         </Paper>
 
         {/* dialog to add books */}
-        <Dialog open={this.state.dialogOpen} onClose={this.handleDialogClose}>
-          <DialogTitle>Add a Book</DialogTitle>
+        <Dialog
+          open={this.state.issueBookDialogOpen}
+          onClose={this.handleDialogClose}
+        >
+          <DialogTitle>Issue a Book</DialogTitle>
           <DialogContent>
             <TextField
               id="add-title"
