@@ -14,10 +14,9 @@ import {
   DialogContent,
   Snackbar,
   IconButton,
-  DialogContentText,
-  Menu,
-  MenuItem
+  DialogContentText
 } from "@material-ui/core";
+import MenuComponent from "./components/MenuComponent";
 import AddIcon from "@material-ui/icons/Add";
 import CloseIcon from "@material-ui/icons/Close";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
@@ -37,12 +36,10 @@ const style = StyleSheet.create({
   },
   menuButton: {
     visibility: "hidden",
-    float: "right",
-    cursor: "pointer",
     padding: "0px"
   },
   hover: {
-    ":hover #menu-button": {
+    ":hover .menu-button": {
       visibility: "visible"
     }
   }
@@ -64,7 +61,6 @@ class Books extends React.Component {
       isbnErr: false,
       copiesErr: false,
       deleteDialog: false,
-      isbnToDelete: "",
       snackbarMessage: "",
       snackbarOpen: false,
       openMenu: null
@@ -102,6 +98,12 @@ class Books extends React.Component {
 
   onIssuedCopiesSearchChange = e => {
     this.setState({ searchIssuedCopies: e.target.value });
+  };
+
+  selectedFn = data => {
+    if (data.selected.toLowerCase() === "delete book") {
+      this.deleteBook(data.data);
+    }
   };
 
   handleDialogClose = () => {
@@ -183,8 +185,7 @@ class Books extends React.Component {
     }
   };
 
-  deleteBook = () => {
-    let isbn = this.state.isbnToDelete;
+  deleteBook = isbn => {
     let books = this.state.books;
     var bookToDelete;
     let booksToKeep = books.filter(a => {
@@ -220,12 +221,12 @@ class Books extends React.Component {
       });
   };
 
-  onMenuClose = () => {
+  onMenuClose = row => {
+    console.log(row);
     this.setState({ openMenu: null });
   };
 
   render() {
-    console.log(this.state.books);
     let filteredBooks = this.state.books.filter(val => {
       return (
         val.title.toLowerCase().indexOf(this.state.searchTitle) !== -1 &&
@@ -318,31 +319,24 @@ class Books extends React.Component {
                 </TableCell>
               </TableRow>
               {filteredBooks.map((row, i) => (
-                <TableRow id={row.isbn} key={i} className={css(style.hover)}>
-                  <TableCell component="th" scope="row">
+                <TableRow key={i} className={css(style.hover)}>
+                  <TableCell
+                    component="th"
+                    scope="row"
+                    style={{
+                      paddingRight: "0",
+                      display: "flex",
+                      justifyContent: "space-between"
+                    }}
+                  >
                     {row.title}
-                    <IconButton
-                      className={css(style.menuButton)}
-                      id="menu-button"
-                      onClick={e =>
-                        this.setState({ openMenu: e.currentTarget })
-                      }
-                    >
-                      <MoreVertIcon />
-                    </IconButton>
-                    <Menu
-                      id="simple-menu"
-                      anchorEl={this.state.openMenu}
-                      keepMounted
-                      open={Boolean(this.state.openMenu)}
-                      onClose={this.onMenuClose}
-                    >
-                      <MenuItem onClick={this.onMenuClose}>
-                        Delete Book
-                      </MenuItem>
-                      <MenuItem onClick={this.onMenuClose}>Edit Book</MenuItem>
-                      <MenuItem onClick={this.onMenuClose}>Issue Book</MenuItem>
-                    </Menu>
+                    <MenuComponent
+                      data={row.isbn}
+                      menuItems={["Edit Book", "Delete Book"]}
+                      icon={MoreVertIcon}
+                      selected={this.selectedFn}
+                      className={`menu-button ${css(style.menuButton)}`}
+                    />
                   </TableCell>
                   <TableCell align="right">{row.author}</TableCell>
                   <TableCell align="right">{row.isbn}</TableCell>

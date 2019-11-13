@@ -18,6 +18,7 @@ import {
   Menu,
   MenuItem
 } from "@material-ui/core";
+import MenuComponent from "./components/MenuComponent";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import CloseIcon from "@material-ui/icons/Close";
 import { StyleSheet, css } from "aphrodite";
@@ -36,12 +37,10 @@ const style = StyleSheet.create({
   },
   menuButton: {
     visibility: "hidden",
-    float: "right",
-    cursor: "pointer",
     padding: "0px"
   },
   hover: {
-    ":hover #menu-button": {
+    ":hover .menu-button": {
       visibility: "visible"
     }
   }
@@ -327,33 +326,20 @@ class Issue extends React.Component {
                       <TableCell
                         component="th"
                         scope="row"
-                        style={{ paddingRight: "0" }}
+                        style={{
+                          paddingRight: "0",
+                          display: "flex",
+                          justifyContent: "space-between"
+                        }}
                       >
                         {book.isbn}
-                        <IconButton
-                          className={css(style.menuButton)}
-                          id="menu-button"
-                          style={{}}
-                          onClick={e =>
-                            this.setState({ openMenu: e.currentTarget })
-                          }
-                        >
-                          <MoreVertIcon />
-                        </IconButton>
-                        <Menu
-                          id="simple-menu"
-                          anchorEl={this.state.openMenu}
-                          keepMounted
-                          open={Boolean(this.state.openMenu)}
-                          onClose={this.onMenuClose}
-                        >
-                          <MenuItem onClick={this.onMenuClose}>
-                            Return Book
-                          </MenuItem>
-                          <MenuItem onClick={this.onMenuClose}>
-                            Re-Issue Book
-                          </MenuItem>
-                        </Menu>
+                        <MenuComponent
+                          data={book.isbn}
+                          menuItems={["ReturnBook", "Re-Issue Book"]}
+                          icon={MoreVertIcon}
+                          selected={this.selectedFn}
+                          className={`menu-button ${css(style.menuButton)}`}
+                        />
                       </TableCell>
                       <TableCell align="right">{book.title}</TableCell>
                       <TableCell align="right">{student.name}</TableCell>

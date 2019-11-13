@@ -16,6 +16,8 @@ import {
   IconButton,
   DialogContentText
 } from "@material-ui/core";
+import MenuComponent from "./components/MenuComponent";
+import MoreVertIcon from "@material-ui/icons/MoreVert";
 import AddIcon from "@material-ui/icons/Add";
 import CloseIcon from "@material-ui/icons/Close";
 import DeleteIcon from "@material-ui/icons/Delete";
@@ -33,6 +35,15 @@ const style = StyleSheet.create({
   },
   dialogFields: {
     margin: "8px"
+  },
+  menuButton: {
+    visibility: "hidden",
+    padding: "0px"
+  },
+  hover: {
+    ":hover .menu-button": {
+      visibility: "visible"
+    }
   }
 });
 
@@ -194,17 +205,6 @@ class Students extends React.Component {
       });
   };
 
-  onHoverStart = e => {
-    let hiddenElem = e.target.parentElement.getElementsByTagName("button")[0];
-    hiddenElem.style.visibility = "visible";
-    this.setState({ hiddenElem });
-  };
-
-  onHoverOver = e => {
-    let hiddenElem = this.state.hiddenElem;
-    hiddenElem.style.visibility = "hidden";
-  };
-
   showBooks = () => {};
 
   render() {
@@ -275,35 +275,30 @@ class Students extends React.Component {
                 </TableCell>
               </TableRow>
               {filteredStudents.map((row, i) => (
-                <TableRow
-                  id={row.rollNumber}
-                  key={i}
-                  onMouseEnter={this.onHoverStart}
-                  onMouseLeave={this.onHoverOver}
-                >
-                  <TableCell component="th" scope="row">
+                <TableRow key={i} className={css(style.hover)}>
+                  <TableCell
+                    component="th"
+                    scope="row"
+                    style={{
+                      paddingRight: "0",
+                      display: "flex",
+                      justifyContent: "space-between"
+                    }}
+                  >
                     {row.name}
-                    <IconButton
-                      style={{
-                        float: "right",
-                        visibility: "hidden",
-                        cursor: "pointer",
-                        padding: "0px"
-                      }}
-                      onClick={e =>
-                        this.setState({
-                          deleteDialog: true,
-                          rollNoToDelete: e.target.closest("tr").id
-                        })
-                      }
-                    >
-                      <DeleteIcon />
-                    </IconButton>
+                    <MenuComponent
+                      data={row.isbn}
+                      menuItems={["Edit Student", "Delete Student"]}
+                      icon={MoreVertIcon}
+                      selected={this.selectedFn}
+                      className={`menu-button ${css(style.menuButton)}`}
+                    />
                   </TableCell>
                   <TableCell align="right">{row.rollNumber}</TableCell>
                   <TableCell align="right">
                     {row.noOfBooks === 0 ? null : (
                       <IconButton
+                        style={{ padding: "0", margin: "0 8px 0 0" }}
                         onClick={() => {
                           this.setState({
                             showBooksDialogOpen: true,
@@ -362,7 +357,7 @@ class Students extends React.Component {
           <DialogContent>
             <DialogContentText>
               {this.state.showBooks.map((book, i) => (
-                <div style={{ width: "40vw" }}>
+                <div key={i} style={{ width: "40vw" }}>
                   {i + 1}. {book.title} - {book.author}
                 </div>
               ))}
