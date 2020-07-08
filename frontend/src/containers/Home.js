@@ -51,7 +51,7 @@ class App extends React.Component {
       return (
         <div
           style={{
-            height: `${this.props.height}px`,
+            height: "100%",
             backgroundColor: "#bbdefb"
           }}
         >
@@ -69,16 +69,10 @@ class App extends React.Component {
       return (
         <div
           style={{
-            height: `${this.props.height}px`,
             backgroundColor: "#bbdefb"
           }}
         >
-          <Grid
-            style={{ paddingTop: "24px" }}
-            container
-            justify="center"
-            alignItems="center"
-          >
+          <Grid container justify="center" alignItems="center">
             <Paper style={{ padding: "15px" }}>
               <Grid
                 container

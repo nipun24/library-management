@@ -14,11 +14,9 @@ import {
   DialogContent,
   Snackbar,
   IconButton,
-  DialogContentText,
-  Menu,
-  MenuItem
+  DialogContentText
 } from "@material-ui/core";
-import MenuComponent from "./components/MenuComponent";
+import MenuComponent from "../components/MenuComponent";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import CloseIcon from "@material-ui/icons/Close";
 import { StyleSheet, css } from "aphrodite";
@@ -43,6 +41,12 @@ const style = StyleSheet.create({
     ":hover .menu-button": {
       visibility: "visible"
     }
+  },
+  innerDiv: {
+    flexGrow: 1,
+    backgroundColor: "#bbdefb",
+    marginTop: "64px",
+    padding: "24px"
   }
 });
 
@@ -261,7 +265,7 @@ class Issue extends React.Component {
     });
 
     return (
-      <div style={{ backgroundColor: "#bbdefb", padding: "24px" }}>
+      <div className={css(style.innerDiv)}>
         <Paper>
           <Table>
             <TableHead>

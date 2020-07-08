@@ -16,11 +16,10 @@ import {
   IconButton,
   DialogContentText
 } from "@material-ui/core";
-import MenuComponent from "./components/MenuComponent";
+import MenuComponent from "../components/MenuComponent";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import AddIcon from "@material-ui/icons/Add";
 import CloseIcon from "@material-ui/icons/Close";
-import DeleteIcon from "@material-ui/icons/Delete";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import { StyleSheet, css } from "aphrodite";
 

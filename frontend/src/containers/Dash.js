@@ -16,6 +16,11 @@ const style = StyleSheet.create({
       transform: "scale(1.05)",
       cursor: "pointer"
     }
+  },
+  innerDiv: {
+    flexGrow: 1,
+    backgroundColor: "#bbdefb",
+    marginTop: "64px"
   }
 });
 
@@ -62,15 +67,8 @@ class Dash extends React.Component {
 
   render() {
     return (
-      <div
-        style={{ height: `${this.props.height}px`, backgroundColor: "#bbdefb" }}
-      >
-        <Grid
-          container
-          justify="center"
-          alignItems="center"
-          style={{ padding: "24px" }}
-        >
+      <div className={css(style.innerDiv)}>
+        <Grid container justify="center" alignItems="center">
           <Paper
             className={css(style.cardStyle)}
             onClick={() => this.props.history.push("/issue-books")}
